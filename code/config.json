@@ -1,9 +1,9 @@
 {
   "filters": [
-    { "lte": 0, "prefix": "🟢", "color": 57347 },
-    { "lte": 50, "prefix": "🟡", "color": 15575296 },
-    { "gt": 50, "lt": 100, "prefix": "🟣", "color": 14156000 },
-    { "gt": 200, "prefix": "🔴", "color": 15859792 },
-    { "prefix": "🔘", "color": 16777215 }
+    { "lte": 0, "prefix": ":green_circle:", "color": 57347 },
+    { "lte": 50, "prefix": ":yellow_circle:", "color": 15575296 },
+    { "gt": 50, "lt": 200, "prefix": ":purple_circle:", "color": 14156000 },
+    { "gte": 200, "prefix": ":red_circle:", "color": 15859792 },
+    { "prefix": ":white_circle:", "color": 16777215 }
   ]
 }

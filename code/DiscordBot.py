@@ -1,3 +1,5 @@
+#%%
+
 import nest_asyncio
 import discord
 import os
@@ -10,6 +12,8 @@ from datetime import date
 from sys import argv, platform
 from time import time
 
+
+
 if __name__ == "__main__":
     load_dotenv()
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
@@ -20,6 +24,7 @@ if __name__ == "__main__":
       print("   Run program with `DISCORD_BOT_TOKEN='<token>' python3 DiscordBot.py` or edit the .env file")
       exit(1)
 
+    FORCEASYNCIO = False
     PREFIX = "😷"
     PRODUCTION_MODE = False
 
@@ -96,9 +101,10 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error occured: " + e)
 
-    if not (platform == "win32" or platform == "win64"):
+    if FORCEASYNCIO or not (platform == "win32" or platform == "win64"):
         print("👉 Using nest_asyncio")
         import nest_asyncio
         nest_asyncio.apply()
         
     client.run(TOKEN)
+# %%
