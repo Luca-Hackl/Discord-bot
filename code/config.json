@@ -1,5 +1,9 @@
 {
-    "lowInzidenz":0,
-    "middleInzidenz":100,
-    "highInzidenz":200
+  "filters": [
+    { "lte": 0, "prefix": "🟢", "color": 57347 },
+    { "lte": 50, "prefix": "🟡", "color": 15575296 },
+    { "gte": 50, "lt": 100, "prefix": "🟣", "color": 14156000 },
+    { "gt": 100, "prefix": "🔴", "color": 15859792 },
+    { "prefix": "🔘", "color": 16777215 }
+  ]
 }
