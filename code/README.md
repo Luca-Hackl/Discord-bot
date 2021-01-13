@@ -1,0 +1,1 @@
+If the Bot is unable to start, remove the '#' at  #nest_asyncio.apply()
