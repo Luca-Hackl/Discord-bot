@@ -12,11 +12,11 @@ def dictgenerator ():
     dictionary = {}
     
     if os.path.exists("RKIData.csv") == False:
-        respone = downloadData()
+        response = downloadData()
         if response[0] == True:
-            print("Success: " + respone[1])
+            print("Success: " + response[1])
         else:
-            print("Failed: " + respone[1])
+            print("Failed: " + response[1])
 
     i = 0
     with open("RKIData.csv") as file:
@@ -57,8 +57,8 @@ def loadConfig(path):
     config = {}
     if os.path.exists(path) == False:
             config["lowInzidenz"] = 0
-            config["middleInzidenz"] = 50
-            config["highInzidenz"] = 100
+            config["middleInzidenz"] = 100
+            config["highInzidenz"] = 200
     else:
         file = open(path)
         config = json.loads(file.read())

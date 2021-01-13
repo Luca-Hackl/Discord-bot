@@ -1,3 +1,5 @@
+#%%
+
 import nest_asyncio
 import discord
 import WebScraping
@@ -59,3 +61,4 @@ async def on_message(message):
 
 nest_asyncio.apply()
 client.run(TOKEN)
+# %%
