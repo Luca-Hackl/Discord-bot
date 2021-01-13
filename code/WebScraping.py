@@ -4,91 +4,117 @@ import os
 from datetime import date
 import csv
 
-from difflib import get_close_matches 
+from difflib import get_close_matches
 
-def dictgenerator ():
+API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
+CSV_FILE_NAME = "RKIData.csv"
 
-    csvData = []
+def generate_dict():
+    csv_data = []
     dictionary = {}
-    
-    if os.path.exists("RKIData.csv") == False:
-        respone = downloadData()
+
+    if not os.path.exists(CSV_FILE_NAME):
+        response = download_data()
         if response[0] == True:
-            print("Success: " + respone[1])
+            print("Success: " + response[1])
         else:
-            print("Failed: " + respone[1])
+            print("Failed: " + response[1])
 
-    i = 0
-    with open("RKIData.csv") as file:
-        data = csv.reader(file)
-        for line in data:
-            if i != 0:
-                csvData.append(line)
-            i = i + 1
+    with open(CSV_FILE_NAME) as f:
+        data = csv.reader(f)
+        for i, line in enumerate(data):
+            # skip header
+            if i == 0:
+                continue
+            csv_data.append(line)
 
-    for line in csvData:
+    for line in csv_data:
         dictionary[line[0] + " " + line[1]] = (line[3], line[4], line[5])
-        
+
     return dictionary
 
-def findCountie(countie, dictionary):
-    prefix = ""
+
+"""
+Returns: Prefix, PrefixColor, Name, Cases, Deaths, Incidence
+"""
+def find_county(county, dictionary) -> [str, str, int, int, int]:
+    # take dict from dictgenerator and convert it to a list
+    dictlist = list(dictionary)
+    # take user input from discord and match it to the closest match in the dictionary
+    namecounty = get_close_matches(county, dictlist, cutoff=0)[0]
+
+    cumulative = float(dictionary[namecounty][2])
+
+    # load config file
+    config = load_config("config.json")
+    prefix, color = check_filters(cumulative, config)
+
+    return prefix, color, namecounty, dictionary[namecounty][0], dictionary[namecounty][1], dictionary[namecounty][2]
+
+
+"""
+Returns the prefix and color from a cumulative
+"""
+def check_filters(cumulative: float, config: dict) -> [str, int]:
+    filters = config["filters"]
     
-    #load config file
-    config = loadConfig("config.json")
-
-    dictlist = list(dictionary)     #take dict from dictgenerator and convert it to a list
-    namecountie = get_close_matches(countie, dictlist, cutoff = 0)[0]   #take user input from discord and match it to the closest match in the dictionary
+    for f in filters:
+        if "lt" in f and not cumulative < f["lt"]:
+            continue
+        if "lte" in f and not cumulative <= f["lte"]:
+            continue
+        if "gt" in f and not cumulative > f["gt"]:
+            continue
+        if "gte" in f and not cumulative >= f["gte"]:
+            continue
+        if "eq" in f and not cumulative == f["eq"]:
+            continue
+        return f["prefix"], f["color"]
     
-    
-    comulative = float(dictionary[namecountie][2])
-    if comulative >= config["highInzidenz"]:
-        prefix = "🔴"
-    elif comulative >= config["middleInzidenz"]:
-        prefix = "🟡"
-    else:
-        prefix = "🟢"
+    # you can override the default by not specifing any filters in the array
+    print("Warn: No filter found for cumulative:", cumulative, "in config!")
+    return "😷", 0
 
-    stringfordiscordchat = f"{prefix} {namecountie}: Gesamtfälle: {dictionary[namecountie][0]}, Gesamttode: {dictionary[namecountie][1]}, Inzidenz: {dictionary[namecountie][2]}"#create string that can be returned and used
 
-    return stringfordiscordchat
+def load_config(path) -> dict:
+    # default config
+    config = {
+        "lowInzidenz": 0,
+        "middleInzidenz": 50,
+        "highInzidenz": 100,
+    }
 
-def loadConfig(path):
-    config = {}
-    if os.path.exists(path) == False:
-            config["lowInzidenz"] = 0
-            config["middleInzidenz"] = 50
-            config["highInzidenz"] = 100
-    else:
-        file = open(path)
-        config = json.loads(file.read())
-        file.close()
-        
+    if os.path.exists(path):
+        with open(path) as f:
+            config = json.loads(f.read())
+
     return config
 
-def downloadData():
 
-    if os.path.exists("RKIData.csv"):
-        with open("RKIData.csv") as file:
-            file.readline()
-            dateLastUpdated = file.readline()
-            dateLastUpdated = dateLastUpdated.split(",")[6][:10]
-            dateToday = date.today().strftime("%d.%m.%Y")
-            if dateLastUpdated == dateToday:
+def download_data():
+    if os.path.exists(CSV_FILE_NAME):
+        with open(CSV_FILE_NAME) as f:
+            f.readline()
+            date_last_updated = f.readline()
+            date_last_updated = date_last_updated.split(",")[6][:10]
+            date_today = date.today().strftime("%d.%m.%Y")
+            if date_last_updated == date_today:
                 print("Already updated data today...")
                 return False, "Already updated data today..."
 
-    r = requests.get("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json") #get json data from RKI website
+    # get json data from RKI website
+    r = requests.get(API_URL)
     res = r.json()
 
     countydata = res["features"]
     length = len(list(countydata))
-    
-    with open("RKIData.csv", "w") as file:
-        file.write("Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, Zuletzt_geupdatet\n")
+
+    with open("RKIData.csv", "w") as f:
+        f.write(
+            "Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, Zuletzt_geupdatet\n")
         for i in range(0, length):
-            for channel in countydata[i].values():                
+            for channel in countydata[i].values():
                 data = f"{channel['GEN']},{channel['BEZ']},{channel['BL']},{channel['cases']},{channel['deaths']},{channel['cases7_per_100k_txt'].replace(',','.')},{channel['last_update']}\n"
-                file.write(data)
+                f.write(data)
 
     return True, "Updated sucessfully..."
