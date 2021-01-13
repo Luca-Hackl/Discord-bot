@@ -7,7 +7,7 @@ import WebScraping
 from dotenv import load_dotenv
 from importlib import reload
 from datetime import date
-from sys import argv
+from sys import argv, platform
 from time import time
 
 if __name__ == "__main__":
@@ -96,5 +96,9 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error occured: " + e)
 
-    #nest_asyncio.apply()
+    if not (platform == "win32" or platform == "win64"):
+        print("👉 Using nest_asyncio")
+        import nest_asyncio
+        nest_asyncio.apply()
+        
     client.run(TOKEN)
