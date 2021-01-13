@@ -2,38 +2,69 @@ import json
 import requests
 import os
 from datetime import date
+import csv
 
 from difflib import get_close_matches 
 
 def dictgenerator ():
 
-    numbers = []
-    names = []
+    csvData = []
+    dictionary = {}
+    
+    if os.path.exists("RKIData.csv") == False:
+        respone = downloadData()
+        if response[0] == True:
+            print("Success: " + respone[1])
+        else:
+            print("Failed: " + respone[1])
 
-    r = requests.get("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json") #get json data from RKI website
-    res = r.json()
- 
-    # Extract specific node content.
-    countiedata = res["features"]     #look at JSON objekt "features" where all counties data is located
-    length = len(list(countiedata))    #checking how many counties are listed (412)
+    i = 0
+    with open("RKIData.csv") as file:
+        data = csv.reader(file)
+        for line in data:
+            if i != 0:
+                csvData.append(line)
+            i = i + 1
 
-    for i in range(0, length):   
-        countiedata = res["features"][i]    #goes into each countie dictionary 
-
-        for channel in countiedata.values():  #goes trough each key inside the specific county dictionary    
-            numbers.append(channel['cases7_per_100k_txt']) #cumulative incidence values
-            name= (channel['GEN'] + " " + channel['BEZ'])  #takes name of counties
-            names.append(name)  
-
-    dictionary = dict(zip(names, numbers))  #create final dictionary
+    for line in csvData:
+        dictionary[line[0] + " " + line[1]] = (line[3], line[4], line[5])
+        
     return dictionary
 
 def findCountie(countie, dictionary):
+    prefix = ""
+    
+    #load config file
+    config = loadConfig("config.json")
+
     dictlist = list(dictionary)     #take dict from dictgenerator and convert it to a list
     namecountie = get_close_matches(countie, dictlist, cutoff = 0)[0]   #take user input from discord and match it to the closest match in the dictionary
-    CumulativeIncidence = dictionary.get(namecountie)     #get value at specific key position   
-    stringfordiscordchat = str(namecountie) + " hat eine inzidenz von: " + str(CumulativeIncidence) #create string that can be returned and used
+    
+    
+    comulative = float(dictionary[namecountie][2])
+    if comulative >= config["highInzidenz"]:
+        prefix = "🔴"
+    elif comulative >= config["middleInzidenz"]:
+        prefix = "🟡"
+    else:
+        prefix = "🟢"
+
+    stringfordiscordchat = f"{prefix} {namecountie}: Gesamtfälle: {dictionary[namecountie][0]}, Gesamttode: {dictionary[namecountie][1]}, Inzidenz: {dictionary[namecountie][2]}"#create string that can be returned and used
+
     return stringfordiscordchat
+
+def loadConfig(path):
+    config = {}
+    if os.path.exists(path) == False:
+            config["lowInzidenz"] = 0
+            config["middleInzidenz"] = 50
+            config["highInzidenz"] = 100
+    else:
+        file = open(path)
+        config = json.loads(file.read())
+        file.close()
+        
+    return config
 
 def downloadData():
 
@@ -44,8 +75,8 @@ def downloadData():
             dateLastUpdated = dateLastUpdated.split(",")[6][:10]
             dateToday = date.today().strftime("%d.%m.%Y")
             if dateLastUpdated == dateToday:
-                print("Already updated today...")
-                return "Already updated today..."
+                print("Already updated data today...")
+                return False, "Already updated data today..."
 
     r = requests.get("https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json") #get json data from RKI website
     res = r.json()
@@ -60,4 +91,4 @@ def downloadData():
                 data = f"{channel['GEN']},{channel['BEZ']},{channel['BL']},{channel['cases']},{channel['deaths']},{channel['cases7_per_100k_txt'].replace(',','.')},{channel['last_update']}\n"
                 file.write(data)
 
-    return "Updated sucessfully..."
+    return True, "Updated sucessfully..."
