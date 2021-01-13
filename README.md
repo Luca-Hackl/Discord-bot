@@ -6,11 +6,11 @@
 * [To-Do](#To-Do)
 
 ## General info
-This is a discord bot (see Features for function). It is still in it's early stages and can only post the newest cumulative incidence values that are posted by the RKI. I'm currently working on more functions for the bot.
+This is a discord bot (see Features for function). Messages that start with "😷" let's the program search for the cumulative incidence values in the city that is typed behind the emoji. !update, updates the values in the csv file. Should be executed once a day.
 
 ## Features
 
-Creates a discord bot that responds to !, if a name of a german countie is typed after the "!" the bot will search trough the newest cumulative incidence values in that countie or city and post it in the channel.
+Creates a discord bot that responds to "😷", if a name of a german countie is typed after the "😷" the bot will search trough the newest cumulative incidence values in that countie or city and post it in the channel.
 
 ## To-Do
-* Save data to a JSON file and use some statistics 
+* Save data to a CSV file and use some statistics 
