@@ -1,9 +1,10 @@
 import json
 import requests
 import os
+import discord
 from datetime import date
 import csv
-
+from time import time
 from difflib import get_close_matches
 
 API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
@@ -118,3 +119,24 @@ def download_data():
                 f.write(data)
 
     return True, "Updated sucessfully..."
+
+def discordstring(county, dictionary):
+
+    time_start = time()
+
+    prefix, color, name, cases, deaths, incidence = find_county(county, dictionary)
+    # build embed
+    embed = discord.Embed(
+        title=f"{prefix} **{name}**",
+        color=color
+    )
+    embed.add_field(name="👥 Fälle (Gesamt)", value=cases, inline=True)
+    embed.add_field(name="☠️ Tode (Gesamt)", value=deaths, inline=True)
+
+    # Add emoji if not in production mode
+    # to be able to distinguish the development mode in a productive environment
+    
+
+    embed.add_field(name="👉 Inzidenz", value=incidence, inline=False)
+
+    return embed,time_start
