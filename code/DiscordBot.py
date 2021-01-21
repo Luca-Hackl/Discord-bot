@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 county = message.content[len(PREFIX):].strip()
 
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
-                if county == "!update":
+                if county == "update":
                     msg = await message.channel.send("⏰ Updating Data...")
                     response = WebScraping.download_data()
                     if response[0] == True:
@@ -79,7 +79,7 @@ if __name__ == "__main__":
                         await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
                     return
                 
-                elif county == "!top5": 
+                elif county == "top5": 
                     
                     listtop5 = statistics.top5()
                                     
@@ -91,22 +91,50 @@ if __name__ == "__main__":
 
                         await msg.edit(content=f"*Fetched in **{fetch_time}ms***", embed=embed)
 
-                elif county[:6] == "!stats":               
+                elif county[:5] == "stats":               
 
-                    croppedinput = county[7:]   #getting rid of the !stats                       
+                    croppedinput = county[6:]   #getting rid of the stats                       
 
                     img = statistics.stats(croppedinput)    
                         
                     await message.channel.send(file=discord.File(img))
                     
-
+                
                 else:     
+                    states = {"Brandenburg": "BB", "Berlin": "BE", 
+                    "Baden-Württemberg": "BW", "Bayern": "BY", 
+                    "Bremen": "HB", "Hessen": "HE", "Hamburg": "HH", 
+                    "Mecklenburg-Vorpommern": "MV", "Niedersachsen": "NI",
+                    "Nordrhein-Westfalen": "NW", "Rheinland-Pfalz": "RP",
+                    "Schleswig-Holstein": "SH", "Saarland": "SL",
+                    "Sachsen": "SN", "Sachsen-Anhalt": "ST", "Thüringen": "TH"}
 
-                    embed, time_start = WebScraping.discordstring(county, dictionary)
-                    fetch_time = round((time()-time_start)*1000, 2)
-                    msg = await message.channel.send(f"⏰ Searching for county **{county}**...")
+                    
+                    if county in states: 
+                        embed = statistics.statesearch(county)
 
-                    await msg.edit(content=f"*Fetched in **{fetch_time}ms***", embed=embed)
+                        await message.channel.send(content=f"*Fetched*", embed=embed)
+
+                    elif county in states.values():
+
+                        key_list = list(states.keys())
+                        val_list = list(states.values())
+
+                        position = val_list.index(county)
+                        state = key_list[position]
+
+                        embed = statistics.statesearch(state)
+
+                        await message.channel.send(content=f"*Fetched*", embed=embed)
+                        
+
+                    else:
+
+                        embed, time_start = WebScraping.discordstring(county, dictionary)
+                        fetch_time = round((time()-time_start)*1000, 2)
+                        msg = await message.channel.send(f"⏰ Searching for county **{county}**...")
+
+                        await msg.edit(content=f"*Fetched in **{fetch_time}ms***", embed=embed)
     
         except Exception as e:
             print("Error occured: " + e)

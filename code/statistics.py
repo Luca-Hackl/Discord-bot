@@ -10,6 +10,7 @@ import os
 
 import requests
 import json
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -149,5 +150,46 @@ def stats(county):
         print("hello")
         print("hello2")
         return imgdata
+
+def statesearch(state):
+
+    mydb = SQLconnect() #connects to SQL server    
+    cursor = mydb.cursor()  
+
+    datetime_1 = datetime.now()
+    currentdate = datetime_1.date()
+    
+
+    sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s ORDER BY Faelle ASC"""  #SQL query
+
+    cursor.execute(sql_select_query,(state, currentdate,))    #takes input from DiscordBotDebug and puts in in %s above
+
+    myresult = cursor.fetchall()  #actually commit query
+    
+    cases = []
+    death = []
+    incidence = []
+
+    for x in myresult:      #search trough results of query
+        
+        cases.append(int(x[3]))
+        death.append(int(x[4]))
+        incidence.append(float(x[5]))     
+
+        cursor.close()
+        mydb.close()
+    
+    summedincidence = sum(incidence)
+
+    embed = discord.Embed(
+        title=f"**{state}**",
+        
+    )
+    embed.add_field(name="👥 Fälle (Gesamt)", value=sum(cases), inline=True)
+    embed.add_field(name="☠️ Tode (Gesamt)", value=sum(death), inline=True)
+
+    embed.add_field(name="👉 Inzidenz", value= round(summedincidence), inline=False)
+
+    return embed
 
 #%% 
