@@ -77,7 +77,7 @@ def top5():
                 
                 counties.append(highestcounties)    #appends names the 5 counties with highest incidence           
 
-        return counties
+    return counties
 
 def SQLadding():
 
