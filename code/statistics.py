@@ -17,8 +17,8 @@ import pandas as pd
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
 
-CSV_FILE_NAME = "RKIData.csv"
 API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
+CSV_FILE_NAME = "RKIData.csv"
 
 def SQLconnect(): 
 
@@ -53,9 +53,9 @@ def top5():
     names = []
 
     counties = []
+
     if os.path.exists(CSV_FILE_NAME):
         with open(CSV_FILE_NAME) as file:
-    
             next (file)             #remove first line
             for line in file:
                 splittedlines = line.split(",")
@@ -81,50 +81,64 @@ def top5():
 
 def SQLadding():
 
-    mydb = SQLconnect()
-    cursor = mydb.cursor()
+    mydb = SQLconnect() #connects to SQL server    
+    cursor = mydb.cursor()  
+
+    datetime_1 = datetime.now()
+    currentdate = datetime_1.date()
     
-    r = requests.get(API_URL)
-    res = r.json()
-    countydata = res["features"]
-    length = len(list(countydata))
+    
+    #sql_select_query  =   #SQL query
 
-    for i in range(0, length):
-        for channel in countydata[i].values():  #takes JSON data and extracts values
-            Stadtname = channel['GEN']
-            Kreis = channel['BEZ']
-            Bundesland = channel['BL']
-            Faelle = channel['cases']
-            Tode= channel['deaths']
-            Inzidenz = channel['cases7_per_100k_txt'].replace(',','.')
-            Zuletzt_geupdatet = channel['last_update']
-            day = Zuletzt_geupdatet[0:2]
-            month = Zuletzt_geupdatet[3:5]
-            year = Zuletzt_geupdatet[6:10]
-            date = (year + "-" + month + "-" + day) #conversion to american date format (yyyy-mm-dd)
+    sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet"""  #SQL query
+    cursor.execute(sql_select_query)    #takes input from DiscordBot and puts in in %s above
+    myresult = cursor.fetchall()
+    for x in myresult:
+        if currentdate == x[6]:
+            print("already upto date")
+            return
+        else:                     
+            r = requests.get(API_URL)
+            res = r.json()
+            countydata = res["features"]
+            length = len(list(countydata))
 
-            sql_command = """INSERT INTO landkreis (Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, Zuletzt_geupdatet)
-            VALUES (%s, %s, %s, %s, %s, %s, %s);"""
-                        
-            data=  (Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, date)
-            cursor.execute(sql_command, data)
-        
-    mydb.commit()
-    mydb.close()
+            for i in range(0, length):
+                for channel in countydata[i].values():  #takes JSON data and extracts values
+                    Stadtname = channel['GEN']
+                    Kreis = channel['BEZ']
+                    Bundesland = channel['BL']
+                    Faelle = channel['cases']
+                    Tode= channel['deaths']
+                    Inzidenz = channel['cases7_per_100k_txt'].replace(',','.')
+                    Zuletzt_geupdatet = channel['last_update']
+                    day = Zuletzt_geupdatet[0:2]
+                    month = Zuletzt_geupdatet[3:5]
+                    year = Zuletzt_geupdatet[6:10]
+                    date = (year + "-" + month + "-" + day) #conversion to american date format (yyyy-mm-dd)
+
+                    sql_command = """INSERT INTO landkreis (Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, Zuletzt_geupdatet)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);"""
+                                
+                    data=  (Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, date)
+                    cursor.execute(sql_command, data)
+                
+            mydb.commit()
+            mydb.close()
+            break
+        return
 
 def stats(county):
 
     try: 
         os.remove('saved_figure.png')   #remove old img data
-    except:
-        print("img doesn't exist")
     finally:
 
         mydb = SQLconnect() #connects to SQL server
         mycursor = mydb.cursor()
 
         sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s"""  #SQL query
-        mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
+        mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBot and puts in in %s above
 
         myresult = mycursor.fetchall()  #actually commit query
 
@@ -145,12 +159,14 @@ def stats(county):
         plt.ylabel('Inzidenzfälle')
         plt.xlabel('Datum')       
 
-        plt.savefig('saved_figure.png') #saves plot as img
+        figName = 'saved_figure.png'
+        fig = plt.gcf()
+        fig.set_size_inches((8.5, 11), forward=False)
+        fig.savefig(figName, dpi=500)
+        
         imgdata = 'saved_figure.png'    #save and return the img path file
-        print("hello")
-        print("hello2")
         return imgdata
-
+    
 def statesearch(state):
 
     mydb = SQLconnect() #connects to SQL server    
@@ -160,12 +176,15 @@ def statesearch(state):
     currentdate = datetime_1.date()
     
 
-    sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s ORDER BY Faelle ASC"""  #SQL query
+    sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s"""  #SQL query
 
-    cursor.execute(sql_select_query,(state, currentdate,))    #takes input from DiscordBotDebug and puts in in %s above
+    cursor.execute(sql_select_query,(state, currentdate,))    #takes input from DiscordBot and puts in in %s above
 
     myresult = cursor.fetchall()  #actually commit query
-    
+
+    cursor.close()
+    mydb.close()
+
     cases = []
     death = []
     incidence = []
@@ -176,8 +195,9 @@ def statesearch(state):
         death.append(int(x[4]))
         incidence.append(float(x[5]))     
 
-        cursor.close()
-        mydb.close()
+    
+    
+    
     
     summedincidence = sum(incidence)
 

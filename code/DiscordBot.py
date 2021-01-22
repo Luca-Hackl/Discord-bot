@@ -69,12 +69,12 @@ if __name__ == "__main__":
                 county = message.content[len(PREFIX):].strip()
 
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
-                if county == "update":
+                if county == "!update":
                     msg = await message.channel.send("⏰ Updating Data...")
                     response = WebScraping.download_data()
-                    if response[0] == True:
-                        statistics.SQLadding()
+                    if response[0] == True:                      
                         await msg.edit(content=f"✅ Updating Data... Done: {response[1]}")
+                        statistics.SQLadding()
                     else:
                         await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
                     return
@@ -144,5 +144,5 @@ if __name__ == "__main__":
         print("👉 Using nest_asyncio")
         import nest_asyncio
         nest_asyncio.apply()
-    nest_asyncio.apply()    
+    nest_asyncio.apply() 
     client.run(TOKEN)
