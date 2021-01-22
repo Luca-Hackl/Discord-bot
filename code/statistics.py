@@ -1,9 +1,8 @@
-import WebScraping
+
 import DiscordBot
 
 import mysql.connector
 import discord
-import os
 from time import time
 from dotenv import load_dotenv
 import os
@@ -91,10 +90,10 @@ def SQLadding():
     #sql_select_query  =   #SQL query
 
     sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet"""  #SQL query
-    cursor.execute(sql_select_query)    
+    cursor.execute(sql_select_query)    #takes input from DiscordBot and puts in in %s above
     myresult = cursor.fetchall()
     for x in myresult:
-        if currentdate == x[6]: #checks newest update date and if its same as today it doesnt update
+        if currentdate == x[6]:
             print("already upto date")
             return
         else:                     
@@ -125,48 +124,9 @@ def SQLadding():
                 
             mydb.commit()
             mydb.close()
-            break
+            
         return
 
-def stats(county):
-
-    try: 
-        os.remove('saved_figure.png')   #remove old img data
-    finally:
-
-        mydb = SQLconnect() #connects to SQL server
-        mycursor = mydb.cursor()
-
-        sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s"""  #SQL query
-        mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBot and puts in in %s above
-
-        myresult = mycursor.fetchall()  #actually commit query
-
-        date = []
-        incidence = []
-
-        for x in myresult:      #search trough results of query
-            
-            date.append(str(x[6]))      
-            incidence.append(float(x[5]))
-
-        d = {'x': date, 'y': np.array(incidence)}   #create numpy array
-                
-        df = pd.DataFrame(d)            #create panda dataframe
-       
-        df.plot(x = "x", y = "y", kind="bar")   #plotting stats
-        plt.title('Inzidenzwert über mehrere Tage/Wochen')  #name axis and title
-        plt.ylabel('Inzidenzfälle')
-        plt.xlabel('Datum')       
-
-        figName = 'saved_figure.png'
-        fig = plt.gcf()
-        fig.set_size_inches((8.5, 11), forward=False)
-        fig.savefig(figName, dpi=500)
-        
-        imgdata = 'saved_figure.png'    #save and return the img path file
-        return imgdata
-    
 def statesearch(state):
 
     mydb = SQLconnect() #connects to SQL server    
@@ -194,10 +154,6 @@ def statesearch(state):
         cases.append(int(x[3]))
         death.append(int(x[4]))
         incidence.append(float(x[5]))     
-
-    
-    
-    
     
     summedincidence = sum(incidence)
 
@@ -211,5 +167,3 @@ def statesearch(state):
     embed.add_field(name="👉 Inzidenz", value= round(summedincidence), inline=False)
 
     return embed
-
-#%% 

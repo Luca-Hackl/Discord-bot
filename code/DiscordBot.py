@@ -1,7 +1,10 @@
+#%%
+
 import nest_asyncio
 import discord
 import os
 
+import Visualize
 import WebScraping
 import statistics
 
@@ -95,7 +98,7 @@ if __name__ == "__main__":
 
                     croppedinput = county[6:]   #getting rid of the stats                       
 
-                    img = statistics.stats(croppedinput)    
+                    img = Visualize.stats(croppedinput)    
                         
                     await message.channel.send(file=discord.File(img))
                     
@@ -111,19 +114,19 @@ if __name__ == "__main__":
 
                     
                     if county in states: 
-                        embed = statistics.statesearch(county) #checks if input is a key
+                        embed = statistics.statesearch(county)
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
 
-                    elif county in states.values(): # checks if input is a value
+                    elif county in states.values():
 
-                        key_list = list(states.keys()) #if yes convert keys and values to a differnt lust
+                        key_list = list(states.keys())
                         val_list = list(states.values())
 
-                        position = val_list.index(county) # checks what index the value is at
-                        state = key_list[position] #gets key from same index value is at
+                        position = val_list.index(county)
+                        state = key_list[position]
 
-                        embed = statistics.statesearch(state)  #sends state name to function
+                        embed = statistics.statesearch(state)
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
                         
@@ -144,5 +147,8 @@ if __name__ == "__main__":
         print("👉 Using nest_asyncio")
         import nest_asyncio
         nest_asyncio.apply()
-    nest_asyncio.apply() 
+    nest_asyncio.apply()
     client.run(TOKEN)
+
+
+# %%

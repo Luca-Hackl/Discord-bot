@@ -7,8 +7,6 @@ import csv
 from time import time
 from difflib import get_close_matches
 
-import statistics
-
 API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
 CSV_FILE_NAME = "RKIData.csv"
 
@@ -143,3 +141,9 @@ def discordstring(county, dictionary):
     embed.add_field(name="👉 Inzidenz", value=incidence, inline=False)
 
     return embed,time_start
+
+
+
+#%%
+
+
