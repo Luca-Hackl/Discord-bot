@@ -111,19 +111,19 @@ if __name__ == "__main__":
 
                     
                     if county in states: 
-                        embed = statistics.statesearch(county)
+                        embed = statistics.statesearch(county) #checks if input is a key
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
 
-                    elif county in states.values():
+                    elif county in states.values(): # checks if input is a value
 
-                        key_list = list(states.keys())
+                        key_list = list(states.keys()) #if yes convert keys and values to a differnt lust
                         val_list = list(states.values())
 
-                        position = val_list.index(county)
-                        state = key_list[position]
+                        position = val_list.index(county) # checks what index the value is at
+                        state = key_list[position] #gets key from same index value is at
 
-                        embed = statistics.statesearch(state)
+                        embed = statistics.statesearch(state)  #sends state name to function
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
                         

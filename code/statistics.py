@@ -91,10 +91,10 @@ def SQLadding():
     #sql_select_query  =   #SQL query
 
     sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet"""  #SQL query
-    cursor.execute(sql_select_query)    #takes input from DiscordBot and puts in in %s above
+    cursor.execute(sql_select_query)    
     myresult = cursor.fetchall()
     for x in myresult:
-        if currentdate == x[6]:
+        if currentdate == x[6]: #checks newest update date and if its same as today it doesnt update
             print("already upto date")
             return
         else:                     
