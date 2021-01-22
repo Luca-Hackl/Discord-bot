@@ -41,6 +41,7 @@ Returns: Prefix, PrefixColor, Name, Cases, Deaths, Incidence
 def find_county(county, dictionary) -> [str, str, int, int, int]:
     # take dict from dictgenerator and convert it to a list
     dictlist = list(dictionary)
+
     # take user input from discord and match it to the closest match in the dictionary
     namecounty = get_close_matches(county, dictlist, cutoff=0)[0]
 
@@ -117,6 +118,7 @@ def download_data():
             for channel in countydata[i].values():
                 data = f"{channel['GEN']},{channel['BEZ']},{channel['BL']},{channel['cases']},{channel['deaths']},{channel['cases7_per_100k_txt'].replace(',','.')},{channel['last_update']}\n"
                 f.write(data)
+                
 
     return True, "Updated sucessfully..."
 
@@ -135,8 +137,13 @@ def discordstring(county, dictionary):
 
     # Add emoji if not in production mode
     # to be able to distinguish the development mode in a productive environment
-    
 
     embed.add_field(name="👉 Inzidenz", value=incidence, inline=False)
 
     return embed,time_start
+
+
+
+#%%
+
+
