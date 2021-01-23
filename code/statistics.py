@@ -1,4 +1,3 @@
-
 import DiscordBot
 
 import mysql.connector
@@ -86,7 +85,6 @@ def SQLadding():
     datetime_1 = datetime.now()
     currentdate = datetime_1.date()
 
-
     #sql_select_query  =   #SQL query
 
     sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet"""  #SQL query
@@ -135,7 +133,6 @@ def statesearch(state):
     datetime_1 = datetime.now()
     currentdate = datetime_1.date()
 
-
     sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s"""  #SQL query
 
     cursor.execute(sql_select_query,(state, currentdate,))    #takes input from DiscordBot and puts in in %s above
@@ -152,7 +149,6 @@ def statesearch(state):
 
         cases.append(int(x[3]))
         death.append(int(x[4]))
-
 
     embed = discord.Embed(
         title=f"**{state}**",

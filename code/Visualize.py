@@ -1,4 +1,3 @@
-#%%
 import mysql.connector
 import discord
 
@@ -23,7 +22,6 @@ def stats(county):
         
         return img
 
-
 def barplot(county):
     
     try: 
@@ -39,7 +37,6 @@ def barplot(county):
         mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
 
         myresult = mycursor.fetchall()  #actually commit query
-
         
         mydb.close()
         date = []
@@ -82,7 +79,6 @@ def piechart(county):
         "Nordrhein-Westfalen": "NW", "Rheinland-Pfalz": "RP",
         "Schleswig-Holstein": "SH", "Saarland": "SL",
         "Sachsen": "SN", "Sachsen-Anhalt": "ST", "Thüringen": "TH"}
-
         
         if county in states: 
 
@@ -102,7 +98,6 @@ def piechart(county):
 
             querysearch = county
 
-        
             mydb = statistics.SQLconnect() #connects to SQL server
             mycursor = mydb.cursor()
 
@@ -112,8 +107,7 @@ def piechart(county):
             mycursor.execute(sql_select_query,(currentdate, querysearch,))    #takes input from DiscordBotDebug and puts in in %s above
                                             
             myresult = mycursor.fetchall()  #actually commit query
-
-            
+        
             mydb.close()
             
             cases = []
@@ -129,9 +123,9 @@ def piechart(county):
 
         d = {'Kategorien': [string1, string2], county: [sum(cases), sum(deaths)]}
 
-        df = pd.DataFrame(d)
+        df = pd.DataFrame(d)    #creates pandas dataframe
 
-        df.groupby(['Kategorien']).sum().plot(kind='pie', y=county, startangle=90)
+        df.groupby(['Kategorien']).sum().plot(kind='pie', y=county, startangle=90)  #plot pie graph
         plt.title('Verhältnis Fälle/Tode von ' + county)
         plt.legend(loc ="lower right")
         figName = 'saved_figure.png'
@@ -150,7 +144,6 @@ def statepiechart(state):
 
     datetime_1 = datetime.now()
     currentdate = datetime_1.date()
-    
 
     sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s"""  #SQL query
 
@@ -163,7 +156,6 @@ def statepiechart(state):
 
     cases = []
     death = []
-    
 
     for x in myresult:      #search trough results of query
         
@@ -171,4 +163,3 @@ def statepiechart(state):
         death.append(int(x[4]))   
 
     return cases,death
-#%% 

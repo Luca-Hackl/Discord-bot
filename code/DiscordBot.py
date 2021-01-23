@@ -1,5 +1,3 @@
-#%%
-
 import nest_asyncio
 import discord
 import os
@@ -14,12 +12,9 @@ from datetime import date
 from sys import argv, platform
 from time import time
 
-
-
 if __name__ == "__main__":
     load_dotenv()
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-
 
     # check if token is present
     if TOKEN == "" or TOKEN == None:
@@ -77,7 +72,7 @@ if __name__ == "__main__":
                     response = WebScraping.download_data()
                     if response[0] == True:                      
                         await msg.edit(content=f"✅ Updating Data... Done: {response[1]}")
-                        statistics.SQLadding()
+                        statistics.SQLadding()  
                     else:
                         await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
                     return
@@ -102,7 +97,6 @@ if __name__ == "__main__":
 
                     await message.channel.send(file=discord.File(img))
 
-
                 else:
                     states = {"Brandenburg": "BB", "Berlin": "BE",
                     "Baden-Württemberg": "BW", "Bayern": "BY",
@@ -112,7 +106,6 @@ if __name__ == "__main__":
                     "Schleswig-Holstein": "SH", "Saarland": "SL",
                     "Sachsen": "SN", "Sachsen-Anhalt": "ST", "Thüringen": "TH"}
 
-
                     if county in states:
                         embed = statistics.statesearch(county)
 
@@ -120,16 +113,15 @@ if __name__ == "__main__":
 
                     elif county in states.values():
 
-                        key_list = list(states.keys())
+                        key_list = list(states.keys())      #if county is a value converts keys and values to an individual list
                         val_list = list(states.values())
 
-                        position = val_list.index(county)
-                        state = key_list[position]
+                        position = val_list.index(county)   #checks index of the county value
+                        state = key_list[position]          #takes key on that position
 
                         embed = statistics.statesearch(state)
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
-
 
                     else:
 
@@ -142,13 +134,9 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error occured: " + e)
 
-
     if FORCEASYNCIO or not (platform == "win32" or platform == "win64"):
         print("👉 Using nest_asyncio")
         import nest_asyncio
         nest_asyncio.apply()
     nest_asyncio.apply()
     client.run(TOKEN)
-
-
-# %%
