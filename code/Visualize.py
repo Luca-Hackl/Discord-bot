@@ -1,3 +1,4 @@
+#%%
 import mysql.connector
 import discord
 
@@ -14,13 +15,20 @@ def stats(county):
 
     parameter = county[0:1]
     if parameter == "/":
-        img = piechart(county[1:])
+        if county.find(" vs ") != -1:
+            
+            img = statscompare(county)
+        else:
+            img = piechart(county[1:])
         
         return img
+    
+
     else:
         img = barplot(county)
         
         return img
+
 
 def barplot(county):
     
@@ -37,6 +45,7 @@ def barplot(county):
         mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
 
         myresult = mycursor.fetchall()  #actually commit query
+
         
         mydb.close()
         date = []
@@ -79,6 +88,7 @@ def piechart(county):
         "Nordrhein-Westfalen": "NW", "Rheinland-Pfalz": "RP",
         "Schleswig-Holstein": "SH", "Saarland": "SL",
         "Sachsen": "SN", "Sachsen-Anhalt": "ST", "Thüringen": "TH"}
+
         
         if county in states: 
 
@@ -98,6 +108,7 @@ def piechart(county):
 
             querysearch = county
 
+        
             mydb = statistics.SQLconnect() #connects to SQL server
             mycursor = mydb.cursor()
 
@@ -107,7 +118,8 @@ def piechart(county):
             mycursor.execute(sql_select_query,(currentdate, querysearch,))    #takes input from DiscordBotDebug and puts in in %s above
                                             
             myresult = mycursor.fetchall()  #actually commit query
-        
+
+            
             mydb.close()
             
             cases = []
@@ -123,9 +135,9 @@ def piechart(county):
 
         d = {'Kategorien': [string1, string2], county: [sum(cases), sum(deaths)]}
 
-        df = pd.DataFrame(d)    #creates pandas dataframe
+        df = pd.DataFrame(d)
 
-        df.groupby(['Kategorien']).sum().plot(kind='pie', y=county, startangle=90)  #plot pie graph
+        df.groupby(['Kategorien']).sum().plot(kind='pie', y=county, startangle=90)
         plt.title('Verhältnis Fälle/Tode von ' + county)
         plt.legend(loc ="lower right")
         figName = 'saved_figure.png'
@@ -144,6 +156,7 @@ def statepiechart(state):
 
     datetime_1 = datetime.now()
     currentdate = datetime_1.date()
+    
 
     sql_select_query  = """SELECT * FROM landkreis WHERE Bundesland = %s AND Zuletzt_geupdatet = %s"""  #SQL query
 
@@ -156,6 +169,7 @@ def statepiechart(state):
 
     cases = []
     death = []
+    
 
     for x in myresult:      #search trough results of query
         
@@ -163,3 +177,63 @@ def statepiechart(state):
         death.append(int(x[4]))   
 
     return cases,death
+
+def statscompare(county):
+
+    try: 
+        os.remove('saved_figure.png')   #remove old img data
+    except: 
+        print("Datei nicht auffindbar")
+    finally:
+
+        comparecounties = []
+
+        mydb = statistics.SQLconnect() #connects to SQL server
+        mycursor = mydb.cursor()
+
+        vsindex = county.index(" vs ")
+        secondcounty = vsindex + 4 #skips the " vs " trough indexing
+
+        comparecounties.append(county[1:vsindex])   #takes county bevore the "vs"
+        comparecounties.append(county[secondcounty:]) #takes the second county 
+        
+        incidence = []
+
+        for county in comparecounties:  #Goes trough both counties
+
+            sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s"""  #SQL query
+            mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
+
+            myresult = mycursor.fetchall()  #actually commit query
+
+            
+            date = []
+            
+
+            for x in myresult:      #search trough results of query
+                
+                date.append(str(x[6]))      
+                incidence.append(float(x[5]))
+
+        county1inc = incidence[len(incidence)//2:]  #takes the first half of the values linked to the first county
+        county2inc = incidence[:len(incidence)//2]
+
+        df = pd.DataFrame({comparecounties[1]: county1inc,
+                            comparecounties[0]: county2inc}, index=date)            #create panda dataframe
+    
+        df.plot.bar(rot=0)
+
+        plt.xticks(rotation=30, horizontalalignment="center")
+        plt.title(f"Inzidenzfälle von {comparecounties[1]} vs {comparecounties[0]}")  #name axis and title
+        plt.ylabel('Inzidenzfälle')
+        plt.xlabel('Datum')   
+
+        figName = 'saved_figure.png'
+        fig = plt.gcf()
+        fig.set_size_inches((8.5, 11), forward=False)
+        fig.savefig(figName, dpi=500)
+        
+        mydb.close()
+
+        imgdata = 'saved_figure.png'    #save and return the img path file
+        return imgdata
