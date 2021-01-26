@@ -1,3 +1,4 @@
+#%%
 import mysql.connector
 import discord
 
@@ -38,28 +39,38 @@ def barplot(county):
     finally:
 
         mydb = statistics.SQLconnect() #connects to SQL server
-        mycursor = mydb.cursor()
+        mycursor = mydb.cursor(buffered=True)
 
-        sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s"""  #SQL query
+        sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s ORDER BY Zuletzt_geupdatet DESC"""  #SQL query
         mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
 
-        myresult = mycursor.fetchall()  #actually commit query
+
+        myresults = []
+
+        for x in range(0,8): #sets how many results will be displayed/searched
+            myresult = mycursor.fetchone()  #actually commit query
+            myresults.append(myresult)
 
         
         mydb.close()
         date = []
         incidence = []
 
-        for x in myresult:      #search trough results of query
-            
-            date.append(str(x[6]))      
-            incidence.append(float(x[5]))
+        for x in myresults:      #search trough results of query
+            if x != None:
+                date.append(str(x[6]))      
+                incidence.append(float(x[5]))
+        
+        df = pd.DataFrame({county: incidence},
+                             index=date) 
+        
+        df = df[::-1]
 
-        d = {'x': date, 'Inzidenzwerte': np.array(incidence)}   #create numpy array
-                
-        df = pd.DataFrame(d)            #create panda dataframe
-       
-        df.plot(x = "x", y = "Inzidenzwerte", kind="bar", color="g")   #plotting stats
+        ax = df.plot(kind="bar", color="g")
+
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
+        
         plt.xticks(rotation=30, horizontalalignment="center")
         plt.title('Inzidenzwert von ' + county)  #name axis and title
         plt.ylabel('Inzidenzfälle')
@@ -243,3 +254,5 @@ def statscompare(county):
 
         imgdata = 'saved_figure.png'    #save and return the img path file
         return imgdata
+
+#%% 
