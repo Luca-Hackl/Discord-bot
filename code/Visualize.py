@@ -1,4 +1,3 @@
-#%%
 import mysql.connector
 import discord
 
@@ -189,7 +188,7 @@ def statscompare(county):
         comparecounties = []
 
         mydb = statistics.SQLconnect() #connects to SQL server
-        mycursor = mydb.cursor()
+        mycursor = mydb.cursor(buffered=True)
 
         vsindex = county.index(" vs ")
         secondcounty = vsindex + 4 #skips the " vs " trough indexing
@@ -201,27 +200,34 @@ def statscompare(county):
 
         for county in comparecounties:  #Goes trough both counties
 
-            sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s"""  #SQL query
+            sql_select_query  = """SELECT * FROM landkreis WHERE Stadtname = %s ORDER BY Zuletzt_geupdatet DESC"""  #SQL query
             mycursor.execute(sql_select_query,(county,))    #takes input from DiscordBotDebug and puts in in %s above
 
-            myresult = mycursor.fetchall()  #actually commit query
-
+            myresults = []
+            for x in range(0,8): #sets how many results will be displayed/searched
             
-            date = []
+                myresult = mycursor.fetchone()  #actually commit query
+                myresults.append(myresult)
             
-
-            for x in myresult:      #search trough results of query
-                
-                date.append(str(x[6]))      
-                incidence.append(float(x[5]))
+            date = []       
+            
+            for x in myresults:      #search trough results of query
+                if x != None:
+                    date.append(str(x[6]))      
+                    incidence.append(float(x[5]))
 
         county1inc = incidence[len(incidence)//2:]  #takes the first half of the values linked to the first county
         county2inc = incidence[:len(incidence)//2]
 
         df = pd.DataFrame({comparecounties[1]: county1inc,
                             comparecounties[0]: county2inc}, index=date)            #create panda dataframe
-    
-        df.plot.bar(rot=0)
+
+        df = df[::-1]
+
+        ax = df.plot(kind = "bar", rot=0)
+
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
 
         plt.xticks(rotation=30, horizontalalignment="center")
         plt.title(f"Inzidenzfälle von {comparecounties[1]} vs {comparecounties[0]}")  #name axis and title
