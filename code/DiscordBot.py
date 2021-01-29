@@ -15,7 +15,8 @@ from time import time
 if __name__ == "__main__":
     load_dotenv()
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-
+    
+    
     # check if token is present
     if TOKEN == "" or TOKEN == None:
       print("❌ No Token specified")
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     dictionary = WebScraping.generate_dict()
     statistics.SQLsetup()
     client = discord.Client()
-
+    
     @client.event
     async def on_ready():
         print("Bot started and connected to Discord...")
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     async def on_message(message):
         try:
             command = message.content
-
+            
             # Reload WebScraping module only in development mode, because among other things "requests" is quite a large module,
             # which can lead to longer waiting times.
             # Besides, you don't need the live updating in productive mode anyway.
@@ -72,56 +73,59 @@ if __name__ == "__main__":
                     response = WebScraping.download_data()
                     if response[0] == True:                      
                         await msg.edit(content=f"✅ Updating Data... Done: {response[1]}")
-                        statistics.SQLadding()  
+                        statistics.SQLadding()
                     else:
                         await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
                     return
 
-                elif county == "top5":
+                elif county == "help":
 
-                    listtop5 = statistics.top5()
+                    embed = WebScraping.helpembed()
 
-                    for item in listtop5:
+                    await message.channel.send(embed = embed)
 
-                        embed, time_start = WebScraping.discordstring(item, dictionary)
-                        fetch_time = round((time()-time_start)*1000, 2)
-                        msg = await message.channel.send(f"⏰ Searching for county **{item}**...")
+                elif county == "top5": 
+                    
+                    embed = statistics.top5()
 
-                        await msg.edit(content=f"*Fetched in **{fetch_time}ms***", embed=embed)
+                    await message.channel.send(embed=embed)
 
-                elif county[:5] == "stats":
 
-                    croppedinput = county[6:]   #getting rid of the stats
+                elif county[:5] == "stats":               
 
-                    img = Visualize.stats(croppedinput)
+                    croppedinput = county[6:]   #getting rid of the stats                       
 
-                    await message.channel.send(file=discord.File(img))
-
-                else:
-                    states = {"Brandenburg": "BB", "Berlin": "BE",
-                    "Baden-Württemberg": "BW", "Bayern": "BY",
-                    "Bremen": "HB", "Hessen": "HE", "Hamburg": "HH",
+                    img = Visualize.stats(croppedinput)    
+                        
+                    await message.channel.send(file=discord.File(img))        
+                
+                else:     
+                    states = {"Brandenburg": "BB", "Berlin": "BE", 
+                    "Baden-Württemberg": "BW", "Bayern": "BY", 
+                    "Bremen": "HB", "Hessen": "HE", "Hamburg": "HH", 
                     "Mecklenburg-Vorpommern": "MV", "Niedersachsen": "NI",
                     "Nordrhein-Westfalen": "NW", "Rheinland-Pfalz": "RP",
                     "Schleswig-Holstein": "SH", "Saarland": "SL",
                     "Sachsen": "SN", "Sachsen-Anhalt": "ST", "Thüringen": "TH"}
 
-                    if county in states:
+                    
+                    if county in states: 
                         embed = statistics.statesearch(county)
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
 
                     elif county in states.values():
 
-                        key_list = list(states.keys())      #if county is a value converts keys and values to an individual list
+                        key_list = list(states.keys())
                         val_list = list(states.values())
 
-                        position = val_list.index(county)   #checks index of the county value
-                        state = key_list[position]          #takes key on that position
+                        position = val_list.index(county)
+                        state = key_list[position]
 
                         embed = statistics.statesearch(state)
 
                         await message.channel.send(content=f"*Fetched*", embed=embed)
+                        
 
                     else:
 
@@ -130,9 +134,10 @@ if __name__ == "__main__":
                         msg = await message.channel.send(f"⏰ Searching for county **{county}**...")
 
                         await msg.edit(content=f"*Fetched in **{fetch_time}ms***", embed=embed)
-
+    
         except Exception as e:
             print("Error occured: " + e)
+
 
     if FORCEASYNCIO or not (platform == "win32" or platform == "win64"):
         print("👉 Using nest_asyncio")

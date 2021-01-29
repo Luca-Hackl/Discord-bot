@@ -6,6 +6,7 @@ from datetime import date
 import csv
 from time import time
 from difflib import get_close_matches
+import statistics
 
 API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
 CSV_FILE_NAME = "RKIData.csv"
@@ -34,6 +35,7 @@ def generate_dict():
 
     return dictionary
 
+
 """
 Returns: Prefix, PrefixColor, Name, Cases, Deaths, Incidence
 """
@@ -51,6 +53,7 @@ def find_county(county, dictionary) -> [str, str, int, int, int]:
     prefix, color = check_filters(cumulative, config)
 
     return prefix, color, namecounty, dictionary[namecounty][0], dictionary[namecounty][1], dictionary[namecounty][2]
+
 
 """
 Returns the prefix and color from a cumulative
@@ -75,6 +78,7 @@ def check_filters(cumulative: float, config: dict) -> [str, int]:
     print("Warn: No filter found for cumulative:", cumulative, "in config!")
     return "😷", 0
 
+
 def load_config(path) -> dict:
     # default config
     config = {
@@ -88,6 +92,7 @@ def load_config(path) -> dict:
             config = json.loads(f.read())
 
     return config
+
 
 def download_data():
     if os.path.exists(CSV_FILE_NAME):
@@ -137,3 +142,32 @@ def discordstring(county, dictionary):
     embed.add_field(name="👉 Inzidenz", value=incidence, inline=False)
 
     return embed,time_start
+
+
+def helpembed():
+    
+    
+    embed = discord.Embed(
+        title=f"**Available commands**",
+        color=3066993
+    )
+    embed.add_field(name="Overview", value=":mask: <LK>", inline=False)
+
+    embed.add_field(name="** ** ", value="** ** ", inline=False)
+
+    embed.add_field(name=":bar_chart: Barplot ** **", value=":mask:stats <LK> ** **", inline=True)
+
+    embed.add_field(name=":bar_chart: Comparison", value=":mask:stats /<LK> vs <LK2>", inline=True)
+
+    embed.add_field(name="** ** ", value="** ** ", inline=False)
+
+    embed.add_field(name=":chart_with_upwards_trend: Lineplot", value=":mask:stats /<LK> L", inline=True)
+
+    embed.add_field(name=":chart_with_upwards_trend: Comparison Lineplot", value=":mask:stats /<LK> vs <LK2> L", inline=True)
+
+    
+
+    return embed
+#%%
+
+

@@ -15,22 +15,21 @@ def stats(county):
 
     parameter = county[0:1]
     if parameter == "/":
-        if county.find(" vs ") != -1 and county[-7:] != "scatter":
+        if county.find(" vs ") != -1 and county[-1:] != "L":
             
             img = statscompare(county)
 
-        elif county[-7:] == "scatter":
+        elif county[-1:] == "L":
             if county.find(" vs ") != -1:
 
-                img = scatterplotcomp(county)
-                
+                img = scatterplotcomp(county)            
             
             else:
             
                 img = scatterplot(county)
 
-
         else:
+
             img = piechart(county)
         
         return img
@@ -43,7 +42,7 @@ def stats(county):
 
 
 def barplot(county):
-    
+
     try: 
         os.remove('saved_figure.png')   #remove old img data
     except: 
@@ -98,7 +97,7 @@ def barplot(county):
 
 def scatterplot(county):
     
-    county = county [1:-7]
+    county = county [1:-1]
 
     try: 
         os.remove('saved_figure.png')   #remove old img data
@@ -122,11 +121,12 @@ def scatterplot(county):
            
             date.append(str(x[6]))      
             incidence.append(float(x[5]))
-        
+
+        date = date[::-2]
+        incidence = incidence[::-2]
+
         df = pd.DataFrame({county: incidence},
                              index=date) 
-        
-        df = df[::-1]
         ax = df.plot()
 
         plt.xticks(rotation=30, horizontalalignment="center")
@@ -147,7 +147,7 @@ def scatterplot(county):
 
 def scatterplotcomp(county):
     
-    county = county [:-7]
+    county = county [:-1]
 
     try: 
         os.remove('saved_figure.png')   #remove old img data
@@ -369,7 +369,7 @@ def statscompare(county):
         ax = df.plot(kind = "bar", rot=0)
 
         for p in ax.patches:
-            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
+            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.015), rotation = 90)
 
         plt.xticks(rotation=30, horizontalalignment="center")
         plt.title(f"Inzidenzfälle von {comparecounties[1]} vs {comparecounties[0]}")  #name axis and title
