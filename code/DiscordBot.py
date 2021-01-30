@@ -93,11 +93,32 @@ if __name__ == "__main__":
 
                 elif county[:5] == "stats":               
 
-                    croppedinput = county[6:]   #getting rid of the stats                       
+                    croppedinput = county[6:]   #getting rid of the stats  
 
-                    img = Visualize.stats(croppedinput)    
+                    if croppedinput.find(" vs ") != -1:
                         
-                    await message.channel.send(file=discord.File(img))        
+                        img = Visualize.statscompare(croppedinput)             
+            
+                    else:
+                        
+                        img = Visualize.barplot(croppedinput)  
+                        
+                    await message.channel.send(file=discord.File(img))    
+    
+
+                elif county[:4] == "line":               
+
+                    croppedinput = county[5:]   #getting rid of the line                       
+                    
+                    if croppedinput.find(" vs ") != -1:
+                        
+                        img = Visualize.scatterplotcomp(croppedinput)            
+            
+                    else:
+                        
+                        img = Visualize.scatterplot(croppedinput)  
+                        
+                    await message.channel.send(file=discord.File(img))    
                 
                 else:     
                     states = {"Brandenburg": "BB", "Berlin": "BE", 

@@ -1,4 +1,3 @@
-#%%
 import mysql.connector
 import discord
 
@@ -10,36 +9,6 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
-
-def stats(county):
-
-    parameter = county[0:1]
-    if parameter == "/":
-        if county.find(" vs ") != -1 and county[-1:] != "L":
-            
-            img = statscompare(county)
-
-        elif county[-1:] == "L":
-            if county.find(" vs ") != -1:
-
-                img = scatterplotcomp(county)            
-            
-            else:
-            
-                img = scatterplot(county)
-
-        else:
-
-            img = piechart(county)
-        
-        return img
-    
-
-    else:
-        img = barplot(county)
-        
-        return img
-
 
 def barplot(county):
 
@@ -96,8 +65,6 @@ def barplot(county):
         return imgdata
 
 def scatterplot(county):
-    
-    county = county [1:-1]
 
     try: 
         os.remove('saved_figure.png')   #remove old img data
@@ -146,8 +113,6 @@ def scatterplot(county):
 
 
 def scatterplotcomp(county):
-    
-    county = county [:-1]
 
     try: 
         os.remove('saved_figure.png')   #remove old img data
@@ -160,8 +125,8 @@ def scatterplotcomp(county):
         vsindex = county.index(" vs ")
         secondcounty = vsindex + 4 #skips the " vs " trough indexing
 
-        comparecounties.append(county[1:vsindex])   #takes county bevore the "vs"
-        comparecounties.append(county[secondcounty:-1]) #takes the second county 
+        comparecounties.append(county[:vsindex])   #takes county bevore the "vs"
+        comparecounties.append(county[secondcounty:]) #takes the second county 
 
        
         mydb = statistics.SQLconnect() #connects to SQL server
@@ -335,9 +300,9 @@ def statscompare(county):
         vsindex = county.index(" vs ")
         secondcounty = vsindex + 4 #skips the " vs " trough indexing
 
-        comparecounties.append(county[1:vsindex])   #takes county bevore the "vs"
+        comparecounties.append(county[:vsindex])   #takes county bevore the "vs"
         comparecounties.append(county[secondcounty:]) #takes the second county 
-        
+
         incidence = []
 
         for county in comparecounties:  #Goes trough both counties
@@ -385,5 +350,3 @@ def statscompare(county):
 
         imgdata = 'saved_figure.png'    #save and return the img path file
         return imgdata
-
-#%% 

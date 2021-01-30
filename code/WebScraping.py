@@ -157,17 +157,14 @@ def helpembed():
 
     embed.add_field(name=":bar_chart: Barplot ** **", value=":mask:stats <LK> ** **", inline=True)
 
-    embed.add_field(name=":bar_chart: Comparison", value=":mask:stats /<LK> vs <LK2>", inline=True)
+    embed.add_field(name=":bar_chart: Comparison", value=":mask:stats <LK> vs <LK2>", inline=True)
 
     embed.add_field(name="** ** ", value="** ** ", inline=False)
 
-    embed.add_field(name=":chart_with_upwards_trend: Lineplot", value=":mask:stats /<LK> L", inline=True)
+    embed.add_field(name=":chart_with_upwards_trend: Lineplot", value=":mask:line <LK>", inline=True)
 
-    embed.add_field(name=":chart_with_upwards_trend: Comparison Lineplot", value=":mask:stats /<LK> vs <LK2> L", inline=True)
+    embed.add_field(name=":chart_with_upwards_trend: Comparison Lineplot", value=":mask:line <LK> vs <LK2>", inline=True)
 
     
 
     return embed
-#%%
-
-
