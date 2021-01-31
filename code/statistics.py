@@ -159,15 +159,13 @@ def statesearch(state):
 
     cases = []
     death = []
-    incidence = []
+
 
     for x in myresult:      #search trough results of query
         
         cases.append(int(x[3]))
         death.append(int(x[4]))
-        incidence.append(float(x[5]))     
-    
-    summedincidence = sum(incidence)
+ 
 
     embed = discord.Embed(
         title=f"**{state}**",
@@ -175,8 +173,6 @@ def statesearch(state):
     )
     embed.add_field(name="👥 Fälle (Gesamt)", value=sum(cases), inline=True)
     embed.add_field(name="☠️ Tode (Gesamt)", value=sum(death), inline=True)
-
-    embed.add_field(name="👉 Inzidenz", value= round(summedincidence), inline=False)
 
     return embed
 
