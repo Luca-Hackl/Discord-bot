@@ -30,6 +30,8 @@ def generate_dict():
                 continue
             csv_data.append(line)
 
+    f.close()
+    
     for line in csv_data:
         dictionary[line[0] + " " + line[1]] = (line[3], line[4], line[5])
 
@@ -105,6 +107,7 @@ def download_data():
                 print("Already updated data today...")
                 return False, "Already updated data today..."
 
+    f.close()
     # get json data from RKI website
     r = requests.get(API_URL)
     res = r.json()
@@ -119,7 +122,8 @@ def download_data():
             for channel in countydata[i].values():
                 data = f"{channel['GEN']},{channel['BEZ']},{channel['BL']},{channel['cases']},{channel['deaths']},{channel['cases7_per_100k_txt'].replace(',','.')},{channel['last_update']}\n"
                 f.write(data)
-                
+
+    f.close()     
 
     return True, "Updated sucessfully..."
 
