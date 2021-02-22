@@ -1,3 +1,5 @@
+#%%
+
 import nest_asyncio
 import discord
 import os
@@ -8,9 +10,15 @@ import statistics
 
 from dotenv import load_dotenv
 from importlib import reload
-from datetime import date
+from datetime import date,datetime
 from sys import argv, platform
 from time import time
+
+import threading
+import mysql.connector
+import requests
+API_URL = "https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_Landkreisdaten/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&outSR=4326&f=json"
+
 
 if __name__ == "__main__":
     load_dotenv()
@@ -66,14 +74,12 @@ if __name__ == "__main__":
             if command.startswith(PREFIX):
                 # Strip prefix from message ("😷 test" -> "test")
                 county = message.content[len(PREFIX):].strip()
-
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
                 if county == "!update":
                     msg = await message.channel.send("⏰ Updating Data...")
-                    response = WebScraping.download_data()
+                    response = statistics.SQLadding()
                     if response[0] == True:                      
                         await msg.edit(content=f"✅ Updating Data... Done: {response[1]}")
-                        statistics.SQLadding()
                     else:
                         await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
                     return
@@ -92,9 +98,8 @@ if __name__ == "__main__":
 
 
                 elif county[:5] == "stats":               
-
+                    
                     croppedinput = county[6:]   #getting rid of the stats  
-
                     if croppedinput.find(" vs ") != -1:
                         
                         img = Visualize.statscompare(croppedinput)             
@@ -109,6 +114,7 @@ if __name__ == "__main__":
                 elif county[:4] == "line":               
 
                     croppedinput = county[5:]   #getting rid of the line                       
+                    
                     
                     if croppedinput.find(" vs ") != -1:
                         
@@ -164,5 +170,7 @@ if __name__ == "__main__":
         print("👉 Using nest_asyncio")
         import nest_asyncio
         nest_asyncio.apply()
-    nest_asyncio.apply()
     client.run(TOKEN)
+
+
+# %%

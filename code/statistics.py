@@ -101,14 +101,16 @@ def SQLadding():
     
     #sql_select_query  =   #SQL query
 
-    sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet"""  #SQL query
+    sql_select_query  = """SELECT * FROM landkreis ORDER BY Zuletzt_geupdatet DESC"""  #SQL query
     cursor.execute(sql_select_query)    #takes input from DiscordBot and puts in in %s above
     myresult = cursor.fetchall()
+    
     for x in myresult:
         if currentdate == x[6]:
-            print("already upto date")
-            return
-        else:                     
+            print("test")
+            return False, "Already updated data today..."
+        else:
+            print("test")                   
             r = requests.get(API_URL)
             res = r.json()
             countydata = res["features"]
@@ -133,11 +135,12 @@ def SQLadding():
                                 
                     data=  (Stadtname, Kreis, Bundesland, Faelle, Tode, Inzidenz, date)
                     cursor.execute(sql_command, data)
-                
+
+
             mydb.commit()
-            mydb.close()
+            mydb.close() 
+            return True, "Updated sucessfully..." 
             
-        return
 
 def statesearch(state):
 
@@ -165,7 +168,6 @@ def statesearch(state):
         
         cases.append(int(x[3]))
         death.append(int(x[4]))
- 
 
     embed = discord.Embed(
         title=f"**{state}**",
