@@ -44,10 +44,11 @@ def generate_dict():
     return dictionary
 
 
-"""
-Returns: Prefix, PrefixColor, Name, Cases, Deaths, Incidence
-"""
+
 def find_county(county, dictionary) -> [str, str, int, int, int]:
+    """
+    Returns: Prefix, PrefixColor, Name, Cases, Deaths, Incidence
+    """
     # take dict from dictgenerator and convert it to a list
     dictlist = list(dictionary)
 
@@ -63,10 +64,11 @@ def find_county(county, dictionary) -> [str, str, int, int, int]:
 
 #prefix, color, name, cases, deaths, incidence
 
-"""
-Returns the prefix and color from a cumulative
-"""
+
 def check_filters(cumulative: float, config: dict) -> [str, int]:
+    """
+    Returns the prefix and color from a cumulative
+    """
     filters = config["filters"]
     
     for f in filters:

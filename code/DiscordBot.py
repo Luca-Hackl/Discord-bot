@@ -52,7 +52,6 @@ if __name__ == "__main__":
         if argument == "-p":
             PRODUCTION_MODE = True
 
-    dictionary = WebScraping.generate_dict()
     statistics.SQLsetup()
     client = discord.Client()
     
@@ -74,6 +73,7 @@ if __name__ == "__main__":
             if command.startswith(PREFIX):
                 # Strip prefix from message ("😷 test" -> "test")
                 county = message.content[len(PREFIX):].strip()
+                dictionary = WebScraping.generate_dict()
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
                 if county == "!update":
                     msg = await message.channel.send("⏰ Updating Data...")
