@@ -59,7 +59,7 @@ if __name__ == "__main__":
     @client.event
     async def on_ready():
         print("Bot started and connected to Discord...")
-        await client.change_presence(activity=discord.Game(name=f"({datetime.today().strftime("%d.%m.%Y %H:%M")): {response[1]}"))
+        await client.change_presence(activity=discord.Game(name=f"({datetime.now().strftime("%d.%m.%Y %H:%M")): {response[1]}"))
 
     @client.event
     async def on_message(message):
