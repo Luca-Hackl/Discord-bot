@@ -58,7 +58,7 @@ def top5():
     mynames = []
     myvalues = []
 
-    for i in range(0,5):
+    for _ in range(0,5):
         myresult = cursor.fetchone()
         mynames.append(myresult[0])
         myvalues.append(myresult[5])
