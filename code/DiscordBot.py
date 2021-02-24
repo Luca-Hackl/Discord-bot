@@ -59,7 +59,7 @@ if __name__ == "__main__":
     @client.event
     async def on_ready():
         print("Bot started and connected to Discord...")
-        await client.change_presence(activity=discord.Game(name=f"update: {response[1]}"))
+        await client.change_presence(activity=discord.Game(name=f"({datetime.today().strftime("%d.%m.%Y %H:%M")): {response[1]}"))
 
     @client.event
     async def on_message(message):
@@ -77,11 +77,8 @@ if __name__ == "__main__":
                 county = message.content[len(PREFIX):].strip()
                 
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
-                if county == "!update":
-                    
-                    return
 
-                elif county == "help":
+                if county == "help":
 
                     embed = WebScraping.helpembed()
 
