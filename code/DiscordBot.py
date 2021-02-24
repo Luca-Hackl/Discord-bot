@@ -24,7 +24,6 @@ if __name__ == "__main__":
     load_dotenv()
     TOKEN = os.getenv('DISCORD_BOT_TOKEN')
     
-    
     # check if token is present
     if TOKEN == "" or TOKEN == None:
       print("❌ No Token specified")
@@ -54,10 +53,13 @@ if __name__ == "__main__":
 
     statistics.SQLsetup()
     client = discord.Client()
+    dictionary = WebScraping.generate_dict()
+    response = statistics.SQLadding()
     
     @client.event
     async def on_ready():
         print("Bot started and connected to Discord...")
+        await client.change_presence(activity=discord.Game(name=f"update: {response[1]}"))
 
     @client.event
     async def on_message(message):
@@ -73,15 +75,10 @@ if __name__ == "__main__":
             if command.startswith(PREFIX):
                 # Strip prefix from message ("😷 test" -> "test")
                 county = message.content[len(PREFIX):].strip()
-                dictionary = WebScraping.generate_dict()
+                
                 # New update command: 😷!update to prevent prefix overloads with other discord bots
                 if county == "!update":
-                    msg = await message.channel.send("⏰ Updating Data...")
-                    response = statistics.SQLadding()
-                    if response[0] == True:                      
-                        await msg.edit(content=f"✅ Updating Data... Done: {response[1]}")
-                    else:
-                        await msg.edit(content=f"❌ Updating Data... Failed: {response[1]}")
+                    
                     return
 
                 elif county == "help":
